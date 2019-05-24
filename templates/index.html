@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VPM</title>
+
+    <link rel="stylesheet" href="static/css/animate.css">
+    <link rel="stylesheet" href="static/css/cui-styleguide.min.css">
+    <link rel="stylesheet" href="static/css/featherlight.min.css">
+    <link rel="icon" href="assets/img/favicon.png" type="image/x-icon">
+
+    <script src="https://code.jquery.com/jquery-3.0.0.min.js" integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0=" crossorigin="anonymous"></script>
+    <script src="static/js/styleguide.js"></script>
+    <script src="static/js/jquery-scrollto.js"></script>
+    <script src="static/js/clipboard.js"></script>
+    <script src="static/js/featherlight.min.js"></script>
+    <script src="static/js/Markdown.Converter.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        function checkFormExport(txt){
+            if(txt.value != '') {
+                document.getElementById('export_temp').disabled = false;
+            } else {
+                document.getElementById('export_temp').disabled = true;
+            }
+        }
+        function checkFormImport(txt){
+            if(txt.value != '') {
+                document.getElementById('import_temp').disabled = false;
+            } else {
+                document.getElementById('import_temp').disabled = true;
+            }
+        }
+    </script>
+</head>
+<body class="cui styleguide">
+<div class="row">
+    <div class="col-md-12 panel-group panel-group--compressed">
+        <div class="panel panel--indigo panel--raised-medium">
+            <div class="flex-center-vertical">
+                <div class="flex-center" data-balloon="icon-cisco" data-balloon-pos="up" data-balloon-length="medium">
+                    <span class="icon-cisco icon-large"></span>
+                </div>
+            </div>
+            <div>
+                <h1 align="center">Viptela Template Migration</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Success or Failure notification-->
+<div class="row d-flex justify-content-center align-items-center" id="alertid">
+    <div class="col-md-10" style="margin-top:25px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert--{{ category }} alert-dismissible" onclick="window.location.reload()">
+            <div class="alert__icon icon-check"></div>
+            <div class="alert__message">{{message}}</div>
+            <div class="alert_close icon-close" data-dismiss="alert"></div>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block body %}{% endblock %}
+    </div>
+</div>
+
+<!--Spinner div-->
+<div id="loading" style="display:none;" class="loading-dots loading-dots--info">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <h6>Exporting</h6>
+</div>
+
+<div id="loading1" style="display:none;" class="loading-dots loading-dots--info">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <h6>Fetching File and Importing</h6>
+</div>
+
+<!--Exporting Templates from Test Env-->
+<div class="row d-flex justify-content-center align-items-center" id="content">
+    <div class="col-md-5">
+        <h2 style="text-align:center">Test Env</h2>
+        <div class="divider divider--thicker"></div>
+        <br>
+        <form action="/export" method="POST">
+            <div class="form-group">
+                <div class="form-group__text" style="">
+                    <input id="textip" type="text" name="textip" onkeyup="checkFormExport(this)" required>
+                    <label for="textip">vManage IP </label>
+                    <div class="required-block">
+                        <span class="icon-asterisk"></span>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div>
+                <div class="form-group__text">
+                    <input id="textuname" type="text" name="textuname" onkeyup="checkFormExport(this)" required>
+                    <label for="textuname">vManage Username </label>
+                    <div class="required-block">
+                        <span class="icon-asterisk"></span>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div>
+                <div class="form-group">
+                    <div class="form-group__text">
+                        <input id="password1" type="password" name="password1" onkeyup="checkFormExport(this)" required>
+                        <label for="password1">vManage Password</label>
+                        <div class="required-block">
+                            <span class="icon-asterisk"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+
+            <div class="d-flex justify-content-center align-items-center">
+                <button class="btn btn--gray-ghost align-items-right" type="submit" id="export_temp"  onclick="$('#loading').show();" disabled >Export Templates</button>
+            </div>
+            <br>
+        </form>
+
+    </div>
+
+    <!--Importing Templates to Prod Env-->
+    <div class="col-md-5">
+        <h2 style="text-align:center">Production Env</h2>
+        <div class="divider divider--thicker"></div>
+        <br>
+        <form action="/import" method="POST">
+            <div class="form-group">
+                <div class="form-group__text" style="">
+                    <input id="textip_import" type="text" name="textip_import" onkeyup="checkFormImport(this)" required>
+                    <label for="textip">vManage IP </label>
+                    <div class="required-block">
+                        <span class="icon-asterisk"></span>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div>
+                <div class="form-group__text">
+                    <input id="textuname_import" type="text" name="textuname_import" onkeyup="checkFormImport(this)" required>
+                    <label for="textuname">vManage Username </label>
+                    <div class="required-block">
+                        <span class="icon-asterisk"></span>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div>
+                <div class="form-group">
+                    <div class="form-group__text">
+                        <input id="password_import" type="password" name="password_import" onkeyup="checkFormImport(this)" required>
+                        <label for="password1">vManage Password</label>
+                        <div class="required-block">
+                            <span class="icon-asterisk"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="row d-flex justify-content-center align-items-center">
+                <input type="file" class="form-control-file" style="width:50%;" name="file" title="Choose a compressed template file" required>
+                <button class="btn btn--gray-ghost" type="submit" id="import_temp" onclick="$('#loading1').show();" disabled> Import Templates</button>
+            </div>
+            <br>
+        </form>
+    </div>
+</div>
+</body>
+</html>
