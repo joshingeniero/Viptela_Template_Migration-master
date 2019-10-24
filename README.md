@@ -14,6 +14,13 @@ The project retrieves all the templates from the vManage test instance through a
 * PyCharm/Any text editor
 * Flask
 
+## Steps to Reproduce
+* Download/clone the repository
+* Import the code into a text editor like pycharm or Atom
+* Install the required dependencies using requirements.txt ```pip install -r requirements.txt```
+* Open controller.py file and make necessary changes as mentioned in the comment in the file
+* After necessary changes are made to the code, execute controller.py file on the editor or on the terminal (```python controller.py```)
+
 #### API Reference/Documentation:
 * [vManage REST APIs](https://sdwan-docs.cisco.com/Product_Documentation/Command_Reference/vManage_REST_APIs/vManage_REST_APIs_Overview)
 
