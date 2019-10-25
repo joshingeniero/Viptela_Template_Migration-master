@@ -22,7 +22,7 @@ The project retrieves all the templates from the vManage test instance through a
 * After necessary changes are made to the code, execute controller.py file on the editor or on the terminal (```python controller.py```)
 
 
-## Screenshot
+### Screenshot
 
 ![alt text](https://github.com/gve-sw/Viptela_Template_Migration-master/blob/master/viptela_template_migration.png)
 
