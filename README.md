@@ -1,3 +1,5 @@
+[![published](https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)](https://developer.cisco.com/codeexchange/github/repo/gve-sw/Viptela_Template_Migration-master)
+
 # Viptela_Template_Migration
 Project aims to demonstrate the automation of migration of templates from vManage test instance to a production instance.
 
