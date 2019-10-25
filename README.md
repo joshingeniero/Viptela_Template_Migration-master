@@ -1,7 +1,7 @@
 # Viptela_Template_Migration
 Project aims to demonstrate the automation of migration of templates from vManage test instance to a production instance.
 
-The project retrieves all the templates from the vManage test instance through a web portal and writes it into a tar file. The tar file is then accessed to fetch the templates and the same is added to the vManage prod instance. This automation helps in reducing the time taken to migrate templates from test environment to the production environmen thereby avoiding human errors.
+The project retrieves all the device and feature templates from vManage test instance through a web portal and writes it into a tar file which helps in versioning. The tar file is then accessed to fetch the templates and the same is added to the vManage prod instance with little or no human intervention. This automation helps in reducing the time taken to migrate templates from test environment to the production environment thereby avoiding human errors and increasing productivity and efficiency of the IT team.
 
 ## Author:
 
