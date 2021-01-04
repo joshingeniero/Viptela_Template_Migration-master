@@ -25,19 +25,13 @@ import shutil
 import glob
 from copy import deepcopy
 from collections import OrderedDict
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
 import urllib3
-#from apscheduler.schedulers.background import BackgroundScheduler
-from werkzeug.utils import secure_filename
+
 
 app = Flask(__name__)
 app.secret_key = 'some_secret'
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-
-# Scheduler to schedule deactivation of a activated policy
-# scheduler = BackgroundScheduler()
-# scheduler.start()
 
 
 @app.route('/')
@@ -78,7 +72,7 @@ def login(vmanage_ip, username, password):
             # sessions = session[vmanage_ip]
             return session[vmanage_ip]
         elif '<html>' in login_response.content:
-            print "Login Failed"
+            print("Login Failed")
             sys.exit(0)
         else:
             print("Unknown exception")
@@ -123,7 +117,7 @@ def template_export():
     device_templates = OrderedDict({"templates": []})
     device_feature_id = OrderedDict()
     device_policy_id = OrderedDict()
-    for key, value in device_template_id.iteritems():
+    for key, value in device_template_id.items():
         url = 'https://' + vmanage_ip + '/dataservice/template/device/object/%s'%value
         r = sessions.get(url, verify=False)
         device_data = json.loads(r.content, object_pairs_hook=OrderedDict)
@@ -152,7 +146,7 @@ def template_export():
     # Writing device_Template data to file
     with open(device_template_json_file, 'w') as f:
         json.dump(device_templates, f)
-    for device_name, template_id_list in device_feature_id.iteritems():
+    for device_name, template_id_list in device_feature_id.items():
         feature_template_json_file = os.path.join(file_path, "%s_features.json"%device_name)
         feature_template_data = OrderedDict()
         for template_id in template_id_list:
@@ -163,7 +157,7 @@ def template_export():
         with open(feature_template_json_file, 'w') as f:
             json.dump(feature_template_data, f)
     if device_policy_id:
-        for device_name, policy_id_list in device_policy_id.iteritems():
+        for device_name, policy_id_list in device_policy_id.items():
             policy_template_json_file = os.path.join(file_path, "%s_policy.json"%device_name)
             policy_template_data = OrderedDict()
             url = 'https://' + vmanage_ip + '/dataservice/template/policy/vedge/'
@@ -181,9 +175,9 @@ def template_export():
     tar.close()
     shutil.rmtree(file_path)
     flash('Successfully Exported the templates as templates_archive.tar.gz in the dir path %s'%(dir_path), 'success')
-    print "Successfully Exported the templates as templates_archive.tar.gz in the dir path %s"%(dir_path)
-    return redirect(url_for('index'))
-
+    print("Successfully Exported the templates as templates_archive.tar.gz in the dir path %s"%(dir_path))
+    # return redirect(url_for('index'))
+    return send_from_directory(dir_path, filename='templates_archive.tar.gz', as_attachment=True)
 
 @app.route('/import', methods=['POST'])
 def template_import():
@@ -200,7 +194,7 @@ def template_import():
         for root, dirs, files in os.walk('/Users'):
             for name in files:
                 if name == f and count==0:
-                    print os.path.abspath(os.path.join(root, name))
+                    print(os.path.abspath(os.path.join(root, name)))
                     count = count + 1
                     file_path = os.path.abspath(os.path.join(root, name))
     except Exception as err:
@@ -267,16 +261,16 @@ def template_import():
         template_id_mapping = {}
         feature_template_file = os.path.join(dest_dir_path, "%s_features.json"%device_template['templateName'])
         if not os.path.exists(feature_template_file):
-            print "No feature templates"
+            print("No feature templates")
         feature_data = load_json_from_file(feature_template_file)
-        template_id_list = feature_data.keys()
+        template_id_list = list(feature_data.keys())
         url = 'https://' + vmanage_ip + '/dataservice/template/feature'
         headers = {'Content-Type': 'application/json'}
         feature_template_id_map = return_feature_template_names_and_ids()
         for template_id in template_id_list:
             if template_id in feature_data:
                 fd = feature_data[template_id]
-                for key in fd.keys():
+                for key in list(fd.keys()):
                     if not key in feature_keys:
                         fd.pop(key, None)
                 if feature_template_id_map and fd["templateName"] in feature_template_id_map:
@@ -305,12 +299,12 @@ def template_import():
             policy_data = load_json_from_file(policy_file)
             policy_id = device_template["policyId"]
             if not policy_id in policy_data:
-                print "Policy data missing in backup"
+                print("Policy data missing in backup")
             headers = {'Content-Type': 'application/json'}
             pd = policy_data[policy_id]
             ch = check_policy(pd['policyName'])
             if ch is False:
-                for key in pd.keys():
+                for key in list(pd.keys()):
                     if not key in policy_keys:
                         pd.pop(key, None)
                 url = 'https://' + vmanage_ip + '/dataservice/template/policy/vedge/'
@@ -319,7 +313,7 @@ def template_import():
             else:
                 new_policy_id = ch
             new_device_template['policyId']  = new_policy_id
-        for key in new_device_template.keys():
+        for key in list(new_device_template.keys()):
             if not key in device_template_keys:
                 new_device_template.pop(key, None)
         url = 'https://' + vmanage_ip + '/dataservice/template/device/feature/'
@@ -328,10 +322,10 @@ def template_import():
             new_device_template = json.dumps(new_device_template)
             post_response = sessions.post(url, data=new_device_template, headers=headers, verify=False) #session.post_request(url, new_device_template)
         else:
-            print "Skipping %s"%new_device_template["templateName"]
+            print("Skipping %s"%new_device_template["templateName"])
     shutil.rmtree(dest_dir_path)
     flash('Successfully imported the templates from templates_archive.tar.gz to %s'%(vmanage_ip), 'success')
-    print "Successfully imported the templates from templates_archive.tar.gz to %s"%(vmanage_ip)
+    print("Successfully imported the templates from templates_archive.tar.gz to %s"%(vmanage_ip))
     return redirect(url_for('index'))
 
 
